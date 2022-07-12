@@ -29,7 +29,7 @@ function make_test_handlers(resp::HTTP.Response)
 end
 
 function wait_for_server(ctx::MockHTTPServer.Ctx; timeout::Real=120.0, pollint::Real=5.0)
-    return timedwait(timeout; pollint) do
+    return timedwait(timeout; pollint=pollint) do
         sock = Sockets.connect(ctx.host, ctx.port)
         if isopen(sock)
             close(sock)
@@ -60,7 +60,7 @@ function test_mockhttpserver()
     host = "127.0.0.1"
     port = 8080
     proto = "http"
-    mockhttp = MockHTTPServer.Ctx(; host, port)
+    mockhttp = MockHTTPServer.Ctx(; host=host, port=port)
     server_uri = "$proto://$host:$port"
 
     @testset "mock" begin

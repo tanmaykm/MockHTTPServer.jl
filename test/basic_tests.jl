@@ -13,7 +13,7 @@ function make_test_handlers(resp::HTTP.Response)
     end
     handler3 = (method=:get, path="/test3", handler=(req)->resp)
     handler4 = (method=(:get,:put), path="/test4", handler=(req)->resp)
-    handler5 = (method=[:get,:put], path="/test5", handler=(req)->resp, config="testconfig")
+    handler5 = (method=[:get,:put], path="/test5", handler=(req)->resp)
 
     return [handler1, handler2, handler3, handler4, handler5]
 end
@@ -25,10 +25,8 @@ function test_handlers(resp::HTTP.Response, hlist::Vector{MockHTTPServer.Handler
         @test (hlist[idx].handler)(nothing) === resp
     end
     @test hlist[1].method == Set([:get, :post, :put, :delete, :head, :patch, :options, :trace])
-    @test hlist[1].config === nothing
     @test hlist[3].method == Set([:get])
     @test hlist[4].method == Set([:get, :put])
-    @test hlist[5].config == "testconfig"
     return nothing
 end
 
