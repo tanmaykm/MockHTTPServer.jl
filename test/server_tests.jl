@@ -60,7 +60,7 @@ function test_mockhttpserver()
     host = "127.0.0.1"
     port = 8080
     proto = "http"
-    mockhttp = MockHTTPServer.Ctx(; host, port)
+    mockhttp = MockHTTPServer.Ctx(; host=host, port=port)
     server_uri = "$proto://$host:$port"
 
     @testset "mock" begin
