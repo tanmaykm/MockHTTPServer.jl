@@ -14,6 +14,14 @@ const TESTS2 = [
     (method=:get, path="/get_notfound", handler=(req)->HTTP.Response(404, "Not Found")),
     (method=(:get,:post), path="/get_servererror", handler=(req)->HTTP.Response(500, "Server Error")),
 ]
+const TESTS3 = [
+    (method=:get, path=r"/getall_[a-z]+", handler=(req)->HTTP.Response(200, "OK")),
+    (method=:get, path=r"/getall_[0-9]+", handler=(req)->HTTP.Response(404, "Not Found")),
+]
+const TESTS3_TESTPATH = [
+    (method=:get, path="/getall_abc", handler=(req)->HTTP.Response(200, "OK")),
+    (method=:get, path="/getall_123", handler=(req)->HTTP.Response(404, "Not Found")),
+]
 
 function make_test_handlers(resp::HTTP.Response)
     handler1_params = (path="/test1", handler=(req)->resp)
@@ -76,6 +84,10 @@ function test_mockhttpserver()
                 @test isempty(mockhttp.handlers)
                 MockHTTPServer.with_mockhttpserver(mockhttp, TESTS2...) do
                     test_all(server_uri, TESTS2)
+                end
+                @test isempty(mockhttp.handlers)
+                MockHTTPServer.with_mockhttpserver(mockhttp, TESTS3...) do
+                    test_all(server_uri, TESTS3_TESTPATH)
                 end
             end
             @test isempty(mockhttp.handlers)

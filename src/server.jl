@@ -11,15 +11,15 @@ Where:
         returns a HTTP.Response). If a HTTP.Response object is provided instead
         of a handler function, an appropriate handler function will be generated
         that just returns the provided response object
-- `path`: The path to match against for the handler.
+- `path`: The path to match against for the handler. A String or Regex
 - `method`: The HTTP method(s) to match against for the handler.
 """
 struct Handler
     method::Set{Symbol}
-    path::String
+    path::Union{String,Regex}
     handler::Function
 
-    function Handler(handler::Function, path::AbstractString;
+    function Handler(handler::Function, path::Union{Regex,AbstractString};
             method = Set([:get, :post, :put, :delete, :head, :patch, :options, :trace]),
         )
         method_set = isa(method, Symbol) ? Set([method]) : Set(method)
@@ -28,17 +28,21 @@ struct Handler
 end
 
 Handler(resp::HTTP.Response, args...; kwargs...) = Handler((req)->resp, args...; kwargs...)
-function Handler(f; path::Union{AbstractString,Nothing}=nothing, kwargs...)
+function Handler(f; path::Union{Regex,AbstractString,Nothing}=nothing, kwargs...)
     @assert path !== nothing
     @assert f !== nothing
     Handler(f, path; kwargs...)
 end
 
-function Handler(; handler::Union{Nothing,Function}=nothing, path::Union{AbstractString,Nothing}=nothing, kwargs...)
+function Handler(; handler::Union{Nothing,Function}=nothing, path::Union{Regex,AbstractString,Nothing}=nothing, kwargs...)
     @assert handler !== nothing
     @assert path !== nothing
     Handler(handler, path; kwargs...)
 end
+
+path_matches(path::String, target::AbstractString) = target == path
+path_matches(path::Regex, target::AbstractString) = match(path, target) !== nothing
+handler_matches(handlerspec::Handler, method::Symbol, target::AbstractString) = (method in handlerspec.method) && path_matches(handlerspec.path, target)
 
 """
     handlers(hlist...)
@@ -101,7 +105,7 @@ function handle(ctx::Ctx, req::HTTP.Request)
     @debug("finding handler for", req.method, req.target)
     method = Symbol(lowercase(req.method))
     for handlerspec in ctx.handlers
-        if (method in handlerspec.method) && req.target == handlerspec.path
+        if handler_matches(handlerspec, method, req.target)
             return handlerspec.handler(req)
         end
     end
