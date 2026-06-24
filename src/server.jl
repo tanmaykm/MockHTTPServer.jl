@@ -84,7 +84,7 @@ mutable struct Ctx
     port::Int
     server_args::Dict{Symbol, Any}
     handlers::Vector{Handler}
-    server::Union{Nothing, HTTP.Servers.Server}
+    server::Union{Nothing, HTTP.Server}
 
     function Ctx(hlist...; host::String="0.0.0.0", port::Int=80, server_args=Dict{Symbol, Any}())
         new(host, port, server_args, handlers(hlist...), nothing)

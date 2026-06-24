@@ -15,4 +15,4 @@ test = ["Test"]
 
 [compat]
 julia = "1.6"
-HTTP = "1"
+HTTP = "1, 2"
